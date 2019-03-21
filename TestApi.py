@@ -25,7 +25,7 @@ def main():
     html += '<img src="data:image/gif;base64,{}">'.format(encodedImg)
     html += '</body></html>'
 
-    return encodedImg
+    return html
 
 if __name__ == '__main__':
     import os
