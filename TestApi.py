@@ -1,6 +1,4 @@
 from flask import Flask
-from PIL import Image
-import webbrowser
 import base64
 
 app = Flask(__name__)
@@ -10,20 +8,17 @@ wsgi_app = app.wsgi_app
 def main():
     """Lendo a imagem e transformando em Base64, devolvendo uma tag <img>"""
 
-    arquivo = "./img/tech.jpg"
-
+    arquivo = "./img/pmz.png"
     f = open(arquivo, 'rb')
     chunk = f.read()
     f.close()
+    # Lendo o Arquivo no diretorio
 
     encodedImg = base64.b64encode(chunk)
-    f = open(arquivo.replace(".jpg", ".txt"), 'w')
-    f.write(str(encodedImg))
-    f.close()
+    # transformando em Base64
 
-    html = '<html><head></head><body>'
-    html += '<img src="data:image/gif;base64,{}">'.format(encodedImg)
-    html += '</body></html>'
+    html = '<img src="data:image/png;base64,{}">'.format(encodedImg).replace("b'", "").replace("'", "")
+    # transformando em uma tag <img>, para rederizar na pagina
 
     return html
 
