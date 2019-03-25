@@ -18,7 +18,7 @@ mycol = mydb["cliente"]
 # #  # Fazendo um Insert no banco
 
 
-myquery = {"name": 'Deyveson'}
+myquery = {"name": 'Thalisson'}
 # Fazendo uma Query
 
 
@@ -34,7 +34,6 @@ myquery = {"name": 'Deyveson'}
 
 
 mydoc = mycol.find()
-print(mydoc)
 # Listando todos o dados do banco.
 
 
@@ -50,7 +49,7 @@ for x in mydoc:
 # dblist = myclient.list_database_names()
 # if "mydatabase" in dblist:
 #   print("O banco de dados existe.")
-# # Verificando se banco existe
+# Verificando se banco existe
 
 
 # for x in mycol.find({},{ "_id": 0, "name": 1, "address": 1 }):
