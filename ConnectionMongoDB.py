@@ -3,7 +3,7 @@ import pymongo
 # Criando uma Conexão com o Banco de dados NoSQL (Não relacional)
 # Fazendo o INSERT, SELECT, DELETE e UPDATE, buscas padronizadas (query)
 
-myclient = pymongo.MongoClient("mongodb://localhost:27017/")
+myclient = pymongo.MongoClient("mongodb://localhost:28017/")
 # Link do MongoClient
 
 mydb = myclient["mydatabase"]
@@ -18,7 +18,7 @@ mycol = mydb["cliente"]
 # #  # Fazendo um Insert no banco
 
 
-myquery = {"name": 'Thalisson'}
+# myquery = {"name": 'Thalisson'}
 # Fazendo uma Query
 
 
