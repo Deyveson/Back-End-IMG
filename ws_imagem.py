@@ -6,8 +6,18 @@ from PIL import Image
 app = Flask(__name__)
 wsgi_app = app.wsgi_app
 
-@app.route("/<codFornecedor>/<codProduto>")
+@app.route("/<codFornecedor>/<codProduto>", methods=['GET'])
 def insert(codFornecedor, codProduto):
+
+    """
+        Função compacta a imagem, tranforma em base64 e salva no banco de dados.
+
+        Argumentos:
+            codFornecedor: string
+            codProduto: string
+        Retorna:
+            json contendo o codFornecedor, codProduto e ImgBase64, imagem compactada em base64.
+    """
 
     response = {}
     value = []
@@ -54,7 +64,6 @@ def insert(codFornecedor, codProduto):
 
     return jsonify(response)
 
-
 @app.route("/list", methods=['GET'])
 def listar():
 
@@ -75,7 +84,6 @@ def listar():
     response = value
 
     return jsonify(response)
-
 
 if __name__ == '__main__':
     import os
