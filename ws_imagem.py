@@ -1,6 +1,7 @@
 from flask import Flask, jsonify
 import base64
 import pymongo
+import os
 from PIL import Image
 
 app = Flask(__name__)
@@ -82,6 +83,22 @@ def listar():
         value.append(x)
 
     response = value
+
+    return jsonify(response)
+
+
+@app.route("/delete/<codFornecedor>/<codProduto>", methods=['GET'])
+def delete(codFornecedor, codProduto):
+
+    response = {}
+
+    diretorio = "./img/"+codFornecedor+"/newImage/"+codProduto
+
+    os.remove(diretorio)
+
+    print("Exclui: {}".format(diretorio))
+
+    response["menssage"] = "Imagem exlcuida com sucesso"
 
     return jsonify(response)
 
