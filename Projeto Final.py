@@ -40,9 +40,9 @@ def insert(codFornecedor, codProduto):
 
     img = Image.open(arquivo)
     new_img = img.resize((300, 256))
-    new_img.save("./img/"+codFornecedor+"/newImage/"+codProduto, 'jpeg')
+    new_img.save("./img/"+codFornecedor+"/newImage/newImg"+codProduto, 'jpeg')
 
-    new_arquivo = "./img/"+codFornecedor+"/newImage/"+codProduto
+    new_arquivo = "./img/"+codFornecedor+"/newImage/newImg"+codProduto
 
     f = open(new_arquivo, 'rb')
     imgCompact = f.read()
@@ -52,6 +52,8 @@ def insert(codFornecedor, codProduto):
 
     documento = {"CodFornecedor": codFornecedor, "CodProduto": codProduto, "ImgBase64": "{}".format(encodedImg).replace("b'", "").replace("'", "")}
     x = mycol.insert_one(documento)
+
+    os.remove(new_arquivo)
 
     # html = '<img src="data:image/jpeg;base64,{}">'.format(encodedImg).replace("b'", "").replace("'", "")
 
