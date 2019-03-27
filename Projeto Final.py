@@ -20,6 +20,8 @@ def insert(codFornecedor, codProduto):
             json contendo o codFornecedor, codProduto e ImgBase64, imagem compactada em base64.
     """
 
+    diretorio = "/volumes/streaming-file-server/images/producao/"
+
     response = {}
     value = []
 
@@ -36,13 +38,22 @@ def insert(codFornecedor, codProduto):
         response = value
         return jsonify(response)
 
-    arquivo = "./img/"+codFornecedor+"/"+codProduto+".jpg"
+    try:
 
-    img = Image.open(arquivo)
-    new_img = img.resize((300, 256))
-    new_img.save("./img/"+codFornecedor+"/newImage/newImg"+codProduto, 'jpeg')
+        arquivo = diretorio + codFornecedor + "/" + codProduto + ".JPG"
+        print("Diretorio: {}".format(arquivo))
 
-    new_arquivo = "./img/"+codFornecedor+"/newImage/newImg"+codProduto
+        img = Image.open(arquivo)
+
+        new_img = img.resize((800, 600))
+
+        new_img.save(diretorio + codFornecedor+"/newImg"+codProduto+".JPG")
+
+    except FileNotFoundError:
+        response["menssage"] = "Diretorio ou imagem nao encontrado"
+        return jsonify(response)
+
+    new_arquivo = "/volumes/streaming-file-server/images/producao/"+codFornecedor+"/newImg"+codProduto+".JPG"
 
     f = open(new_arquivo, 'rb')
     imgCompact = f.read()
@@ -56,6 +67,7 @@ def insert(codFornecedor, codProduto):
     os.remove(new_arquivo)
 
     # html = '<img src="data:image/jpeg;base64,{}">'.format(encodedImg).replace("b'", "").replace("'", "")
+    # se quisesse devolver uma tag HTML
 
     myquery = {"CodFornecedor": "{}".format(codFornecedor), "CodProduto": "{}".format(codProduto)}
     mydoc = mycol.find(myquery, {'_id': 0})
@@ -76,7 +88,7 @@ def listar():
     mydb = myclient["baseImages"]
     mycol = mydb["produtos"]
 
-    # mycol.delete_one({"CodFornecedor": "544", "CodProduto": "456" })
+    # mycol.delete_one({"CodFornecedor": "3178", "CodProduto": "311" })
 
     value = []
 
@@ -87,7 +99,6 @@ def listar():
     response = value
 
     return jsonify(response)
-
 
 @app.route("/delete/<codFornecedor>/<codProduto>", methods=['GET'])
 def delete(codFornecedor, codProduto):
