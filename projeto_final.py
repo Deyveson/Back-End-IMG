@@ -1,4 +1,5 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request, abort
+from flask_cors import CORS, cross_origin
 import base64
 import pymongo
 import os
@@ -6,9 +7,14 @@ from PIL import Image
 
 app = Flask(__name__)
 wsgi_app = app.wsgi_app
+cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
 
-@app.route("/<codFornecedor>/<codProduto>", methods=['GET'])
-def insert(codFornecedor, codProduto):
+@app.route("/imagem", methods=['GET'])
+@cross_origin()
+def insert():
+
+    codFornecedor = request.args.get('codigoFornecedor')
+    codProduto = request.args.get('codigo')
 
     """
         Função compacta a imagem, tranforma em base64 e salva no banco de dados.
@@ -45,15 +51,14 @@ def insert(codFornecedor, codProduto):
 
         img = Image.open(arquivo)
 
-        new_img = img.resize((800, 600))
+        new_img = img.resize((350, 300))
 
         new_img.save(diretorio + codFornecedor+"/newImg"+codProduto+".JPG")
 
     except FileNotFoundError:
-        response["menssage"] = "Diretorio ou imagem nao encontrado"
-        return jsonify(response)
+        abort(404)
 
-    new_arquivo = "/volumes/streaming-file-server/images/producao/"+codFornecedor+"/newImg"+codProduto+".JPG"
+    new_arquivo = diretorio + codFornecedor + "/newImg" + codProduto+".JPG"
 
     f = open(new_arquivo, 'rb')
     imgCompact = f.read()
@@ -88,7 +93,7 @@ def listar():
     mydb = myclient["baseImages"]
     mycol = mydb["produtos"]
 
-    # mycol.delete_one({"CodFornecedor": "3178", "CodProduto": "311" })
+    # mycol.delete_one({"CodFornecedor": "144", "CodProduto": "16005" })
 
     value = []
 
