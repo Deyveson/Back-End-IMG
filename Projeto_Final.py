@@ -7,7 +7,7 @@ from PIL import Image
 
 app = Flask(__name__)
 wsgi_app = app.wsgi_app
-cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
+CORS(app)
 
 @app.route("/imagem", methods=['GET'])
 @cross_origin()
@@ -71,9 +71,6 @@ def insert():
 
     os.remove(new_arquivo)
 
-    # html = '<img src="data:image/jpeg;base64,{}">'.format(encodedImg).replace("b'", "").replace("'", "")
-    # se quisesse devolver uma tag HTML
-
     myquery = {"CodFornecedor": "{}".format(codFornecedor), "CodProduto": "{}".format(codProduto)}
     mydoc = mycol.find(myquery, {'_id': 0})
 
@@ -84,8 +81,21 @@ def insert():
 
     return jsonify(response)
 
-@app.route("/list", methods=['GET'])
+@app.route("/searchImg", methods=['GET'])
 def listar():
+
+    """
+        Função para consulta no banco de dados, de uma imagem especifica.
+
+        Argumentos:
+            codFornecedor: string
+            codProduto: string
+        Retorna:
+            json contendo o codFornecedor, codProduto e ImgBase64.
+    """
+
+    codFornecedor = request.args.get('codigoFornecedor')
+    codProduto = request.args.get('codigo')
 
     response = {}
 
@@ -97,28 +107,14 @@ def listar():
 
     value = []
 
-    for x in mycol.find({}, {"_id": 0, "CodFornecedor": 1, "CodProduto": 1, "ImgBase64": 1}):
+    myquery = {"CodFornecedor": "{}".format(codFornecedor), "CodProduto": "{}".format(codProduto)}
+    mydoc = mycol.find(myquery, {'_id': 0})
+
+    for x in mydoc:
         print(x)
         value.append(x)
-
-    response = value
-
-    return jsonify(response)
-
-@app.route("/delete/<codFornecedor>/<codProduto>", methods=['GET'])
-def delete(codFornecedor, codProduto):
-
-    response = {}
-
-    diretorio = "./img/"+codFornecedor+"/newImage/"+codProduto
-
-    os.remove(diretorio)
-
-    print("Exclui: {}".format(diretorio))
-
-    response["menssage"] = "Imagem exlcuida com sucesso"
-
-    return jsonify(response)
+        response = value
+        return jsonify(response)
 
 if __name__ == '__main__':
     import os
