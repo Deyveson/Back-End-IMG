@@ -12,24 +12,22 @@ CORS(app)
 @app.route("/imagem", methods=['GET'])
 @cross_origin()
 def insert():
+    """
+            Função compacta a imagem, tranforma em base64 e salva no banco de dados.
+
+            Argumentos:
+                codFornecedor: string
+                codProduto: string
+            Retorna:
+                json contendo o codFornecedor, codProduto e ImgBase64, imagem compactada em base64.
+    """
 
     codFornecedor = request.args.get('codigoFornecedor')
     codProduto = request.args.get('codigo')
-
-    """
-        Função compacta a imagem, tranforma em base64 e salva no banco de dados.
-
-        Argumentos:
-            codFornecedor: string
-            codProduto: string
-        Retorna:
-            json contendo o codFornecedor, codProduto e ImgBase64, imagem compactada em base64.
-    """
-
-    diretorio = "/volumes/streaming-file-server/images/producao/"
-
     response = {}
     value = []
+
+    diretorio = "/volumes/streaming-file-server/images/producao/"
 
     myclient = pymongo.MongoClient("mongodb://localhost:28017/")
     mydb = myclient["baseImages"]
@@ -39,7 +37,6 @@ def insert():
     mydoc = mycol.find(myquery, {'_id': 0})
 
     for x in mydoc:
-        print(x)
         value.append(x)
         response = value
         return jsonify(response)
@@ -47,11 +44,10 @@ def insert():
     try:
 
         arquivo = diretorio + codFornecedor + "/" + codProduto + ".JPG"
-        print("Diretorio: {}".format(arquivo))
 
         img = Image.open(arquivo)
 
-        new_img = img.resize((350, 300))
+        new_img = img.resize((800, 600))
 
         new_img.save(diretorio + codFornecedor+"/newImg"+codProduto+".JPG")
 
@@ -75,7 +71,6 @@ def insert():
     mydoc = mycol.find(myquery, {'_id': 0})
 
     for x in mydoc:
-        print(x)
         value.append(x)
         response = value
 
@@ -103,7 +98,7 @@ def listar():
     mydb = myclient["baseImages"]
     mycol = mydb["produtos"]
 
-    # mycol.delete_one({"CodFornecedor": "144", "CodProduto": "16005" })
+    # mycol.delete_one({"CodFornecedor": "373", "CodProduto": "1752" })
 
     value = []
 
@@ -111,10 +106,50 @@ def listar():
     mydoc = mycol.find(myquery, {'_id': 0})
 
     for x in mydoc:
-        print(x)
         value.append(x)
         response = value
         return jsonify(response)
+
+    return abort(404)
+
+# @app.route("/listAll", methods=['GET'])
+# def listAll():
+#
+#     response = {}
+#
+#     myclient = pymongo.MongoClient("mongodb://localhost:28017/")
+#     mydb = myclient["baseImages"]
+#     mycol = mydb["produtos"]
+#
+#     mycol.delete_one({"CodFornecedor": "292", "CodProduto": "BAH0094" })
+#
+#     # value = []
+#     #
+#     # for x in mycol.find({}, {"_id": 0, "CodFornecedor": 1, "CodProduto": 1, "ImgBase64": 1}):
+#     #     print(x)
+#     #     value.append(x)
+#     #
+#     # response = value
+#
+#     return jsonify(response)
+
+@app.route("/imageGroup", methods=['GET', 'POST'])
+def groupImg():
+
+    myclient = pymongo.MongoClient("mongodb://localhost:28017/")
+    mydb = myclient["baseImages"]
+    mycol = mydb["produtos"]
+
+    value = []
+
+    for x in request.json:
+        myquery = {"CodFornecedor": "{}".format(x["CodFornecedor"]),
+                   "CodProduto": "{}".format(x["CodProduto"])}
+        mydoc = mycol.find(myquery, {'_id': 0})
+        for resp in mydoc:
+            value.append(resp)
+
+    return jsonify(value)
 
 if __name__ == '__main__':
     import os
