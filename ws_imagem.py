@@ -131,16 +131,16 @@ def listAll():
     #
     # mydb.mycol.find()
 
-    mycol.delete_one({"CodFornecedor": "653", "CodProduto": "JTS497"})
+    # mycol.delete_one({"CodFornecedor": "653", "CodProduto": "JTS497"})
     # mycol.delete_one({"CodFornecedor": "767", "CodProduto": "ZL0365"})
 
-    # value = []
-    #
-    # for x in mycol.find({}, {"_id": 0}):
-    #     print(x)
-    #     value.append(x)
-    #
-    # response = value
+    value = []
+
+    for x in mycol.find({}, {"_id": 0}):
+        print(x)
+        value.append(x)
+
+    response = value
 
     return jsonify(response)
 

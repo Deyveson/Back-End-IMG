@@ -12,6 +12,19 @@ CORS(app)
 @app.route("/imageGroup", methods=['GET', 'POST'])
 def groupImg():
 
+    """
+            Função para compacta, redimensionar a imagem, tranforma em base64 e salvar no banco de dados.
+
+            Argumentos:
+                Array:
+                        {
+                            "CodFornecedor" : "111111",
+                            "CodProduto" : "222222"
+                        }
+            Retorna:
+                json contendo um array com codFornecedor, codProduto e ImgBase64, imagem compactada em base64.
+    """
+
     myclient = pymongo.MongoClient("mongodb://localhost:28017/")
     mydb = myclient["baseImages"]
     mycol = mydb["produtos"]
@@ -19,7 +32,7 @@ def groupImg():
     diretorio = "/volumes/streaming-file-server/images/producao/"
 
     response = []
-    exite = 0
+    existe = 0
 
     for x in request.json:
         myquery = {"CodFornecedor": "{}".format(x["CodFornecedor"]),
@@ -28,13 +41,13 @@ def groupImg():
 
         for resp in mydoc:
             response.append(resp)
-            exite += 1
+            existe += 1
 
-    if(exite == len(request.json)):
+    if(existe == len(request.json)):
         print("TODAS IMAGENS EXISTEM NO BANCO")
         return jsonify(response)
 
-    elif (exite < len(request.json)):
+    elif (existe < len(request.json)):
         print("NOVA IMAGEM, COMPACTAR & TRASFORMA EM BASE64")
         try:
 
@@ -54,7 +67,19 @@ def groupImg():
 
         except FileNotFoundError:
 
-            abort(404)
+            print("UMA DAS IMAGEM NAO EXISTEM, DEVOLVER APENAS AS EXISTENTES")
+
+            newResponse = []
+
+            for i in request.json:
+                myquery = {"CodFornecedor": "{}".format(i["CodFornecedor"]),
+                           "CodProduto": "{}".format(i["CodProduto"])}
+                mydoc = mycol.find(myquery, {'_id': 0})
+
+                for resp in mydoc:
+                    newResponse.append(resp)
+
+            return jsonify(newResponse)
 
         new_arquivo = diretorio + x["CodFornecedor"] + "/newImg" + x["CodProduto"] + ".JPG"
 
@@ -81,6 +106,41 @@ def groupImg():
             newResponse.append(resp)
 
     return jsonify(newResponse)
+
+
+@app.route("/searchImg", methods=['GET'])
+def listar():
+
+    """
+        Função para consulta no banco de dados, de uma imagem especifica.
+
+        Argumentos:
+            codFornecedor: string
+            codProduto: string
+        Retorna:
+            json contendo o codFornecedor, codProduto e ImgBase64.
+    """
+
+    codFornecedor = request.args.get('codFornecedor')
+    codProduto = request.args.get('codProduto')
+
+    response = {}
+
+    myclient = pymongo.MongoClient("mongodb://localhost:28017/")
+    mydb = myclient["baseImages"]
+    mycol = mydb["produtos"]
+
+    value = []
+
+    myquery = {"CodFornecedor": "{}".format(codFornecedor), "CodProduto": "{}".format(codProduto)}
+    mydoc = mycol.find(myquery, {'_id': 0})
+
+    for x in mydoc:
+        value.append(x)
+        response = value
+        return jsonify(response)
+    response["menssage"] = "sem registro"
+    return jsonify(response)
 
 if __name__ == '__main__':
     import os
