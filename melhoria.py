@@ -4,6 +4,7 @@ import base64
 import pymongo
 import os
 from PIL import Image
+import gzip
 
 app = Flask(__name__)
 wsgi_app = app.wsgi_app
@@ -32,6 +33,7 @@ def groupImg():
 
     if(exite == len(request.json)):
         print("TODAS IMAGENS EXISTEM NO BANCO")
+        gzip.compress(response)
         return jsonify(response)
 
     elif (exite < len(request.json)):
@@ -48,7 +50,7 @@ def groupImg():
 
             hsize = int((float(img.size[1]) * float(wpercent)))
 
-            new_img = img.resize((basewidth, hsize), Image.ANTIALIAS)
+            new_img = img.resize((basewidth,hsize), Image.ANTIALIAS)
 
             new_img.save(diretorio + x["CodFornecedor"] + "/newImg" + x["CodProduto"] + ".JPG", optimize=True)
 
@@ -79,6 +81,8 @@ def groupImg():
 
         for resp in mydoc:
             newResponse.append(resp)
+
+    gzip.compress(newResponse)
 
     return jsonify(newResponse)
 

@@ -43,11 +43,19 @@ def insert():
 
     try:
 
+        print("CHEGOU AQUI")
+
         arquivo = diretorio + codFornecedor + "/" + codProduto + ".JPG"
+
+        basewidth = 400
 
         img = Image.open(arquivo)
 
-        new_img = img.resize((800, 600))
+        wpercent = (basewidth / float(img.size[0]))
+
+        hsize = int((float(img.size[1]) * float(wpercent)))
+
+        new_img = img.resize((basewidth, hsize), Image.ANTIALIAS)
 
         new_img.save(diretorio + codFornecedor+"/newImg"+codProduto+".JPG")
 
@@ -97,8 +105,6 @@ def listar():
     myclient = pymongo.MongoClient("mongodb://localhost:28017/")
     mydb = myclient["baseImages"]
     mycol = mydb["produtos"]
-
-    # mycol.delete_one({"CodFornecedor": "736", "CodProduto": "2250" })
 
     value = []
 
