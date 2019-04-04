@@ -2,6 +2,7 @@ from flask import Flask, jsonify, request, abort
 from flask_cors import CORS, cross_origin
 import base64
 import pymongo
+import requests
 import os
 from PIL import Image
 
@@ -10,18 +11,49 @@ wsgi_app = app.wsgi_app
 CORS(app)
 
 @app.route("/imageGroup", methods=['GET', 'POST'])
-def groupImg():
+def searchGroup():
+
+    """
+            Função para indetificar a variavel de ambiente e determina as suas rotas.
+
+            :argument:
+                PROFILE
+            :return:
+                a resposta das funções.
+    """
+
+    if os.environ['PROFILE'] == 'matriz':
+
+        return groupImgMatriz()
+
+    elif os.environ['PROFILE'] == 'filial':
+
+        return groupImgFilial()
+
+
+@app.route("/searchImg", methods=['GET'])
+def search():
+
+    if os.environ['PROFILE'] == 'matriz':
+
+        return listarMatriz()
+
+    elif os.environ['PROFILE'] == 'filial':
+
+        return listarFilial()
+
+def groupImgMatriz():
 
     """
             Função para compacta, redimensionar a imagem, tranforma em base64 e salvar no banco de dados.
 
-            Argumentos:
+            :argument:
                 Array:
                         {
                             "CodFornecedor" : "111111",
                             "CodProduto" : "222222"
                         }
-            Retorna:
+            :return:
                 json contendo um array com codFornecedor, codProduto e ImgBase64, imagem compactada em base64.
     """
 
@@ -107,17 +139,15 @@ def groupImg():
 
     return jsonify(newResponse)
 
-
-@app.route("/searchImg", methods=['GET'])
-def listar():
+def listarMatriz():
 
     """
         Função para consulta no banco de dados, de uma imagem especifica.
 
-        Argumentos:
+        :argument:
             codFornecedor: string
             codProduto: string
-        Retorna:
+        :return:
             json contendo o codFornecedor, codProduto e ImgBase64.
     """
 
@@ -128,6 +158,88 @@ def listar():
 
     myclient = pymongo.MongoClient("mongodb://localhost:28017/")
     mydb = myclient["baseImages"]
+    mycol = mydb["produtos"]
+
+    value = []
+
+    myquery = {"CodFornecedor": "{}".format(codFornecedor), "CodProduto": "{}".format(codProduto)}
+    mydoc = mycol.find(myquery, {'_id': 0})
+
+    for x in mydoc:
+        value.append(x)
+        response = value
+        return jsonify(response)
+    response["menssage"] = "sem registro"
+    return jsonify(response)
+
+def groupImgFilial():
+
+    """
+            Função para consulta no banco de dados, de uma imagem especifica, se não achar ele faz uma requisição para o serviço da matriz.
+
+            :argument:
+                Array:
+                        {
+                            "CodFornecedor" : "111111",
+                            "CodProduto" : "222222"
+                        }
+            :return:
+                json contendo o codFornecedor, codProduto e ImgBase64.
+    """
+
+    myclient = pymongo.MongoClient("mongodb://localhost:28017/")
+    mydb = myclient["baseImagesFilial"]
+    mycol = mydb["produtos"]
+
+    diretorio = "/volumes/streaming-file-server/images/producao/"
+
+    response = []
+    existe = 0
+
+    for x in request.json:
+        myquery = {"CodFornecedor": "{}".format(x["CodFornecedor"]),
+                   "CodProduto": "{}".format(x["CodProduto"])}
+        mydoc = mycol.find(myquery, {'_id': 0})
+
+        for resp in mydoc:
+            response.append(resp)
+            existe += 1
+
+    if (existe == len(request.json)):
+        print("TODAS IMAGENS EXISTEM NO BANCO DA FILIAL")
+        return jsonify(response)
+
+    elif (existe < len(request.json)):
+        print("FAAZENDO A REQUISIÇÃO PARA MATRIZ")
+
+        url = "http://localhost:5555/imageGroup"
+
+        resp = requests.post(url, data=None, json=request.json)
+
+        for x in resp.json():
+            mycol.insert_one(x)
+
+        return jsonify(resp.json())
+
+def listarFilial():
+
+    """
+        Função para consulta no banco de dados, de uma imagem especifica.
+
+        :argument:
+            codFornecedor: string
+            codProduto: string
+        :return:
+            json contendo o codFornecedor, codProduto e ImgBase64.
+    """
+
+    codFornecedor = request.args.get('codFornecedor')
+    codProduto = request.args.get('codProduto')
+
+    response = {}
+
+    myclient = pymongo.MongoClient("mongodb://localhost:28017/")
+    mydb = myclient["baseImagesFilial"]
     mycol = mydb["produtos"]
 
     value = []

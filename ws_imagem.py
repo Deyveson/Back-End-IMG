@@ -43,8 +43,6 @@ def insert():
 
     try:
 
-        print("CHEGOU AQUI")
-
         arquivo = diretorio + codFornecedor + "/" + codProduto + ".JPG"
 
         basewidth = 400
@@ -60,7 +58,8 @@ def insert():
         new_img.save(diretorio + codFornecedor+"/newImg"+codProduto+".JPG")
 
     except FileNotFoundError:
-        abort(404)
+        response["menssage"] = "imagem nao existe"
+        return jsonify(response)
 
     new_arquivo = diretorio + codFornecedor + "/newImg" + codProduto+".JPG"
 
@@ -131,16 +130,16 @@ def listAll():
     #
     # mydb.mycol.find()
 
-    # mycol.delete_one({"CodFornecedor": "653", "CodProduto": "JTS497"})
+    mycol.delete_one({"CodFornecedor": "7777", "CodProduto": "666"})
     # mycol.delete_one({"CodFornecedor": "767", "CodProduto": "ZL0365"})
 
-    value = []
-
-    for x in mycol.find({}, {"_id": 0}):
-        print(x)
-        value.append(x)
-
-    response = value
+    # value = []
+    #
+    # for x in mycol.find({}, {"_id": 0}):
+    #     print(x)
+    #     value.append(x)
+    #
+    # response = value
 
     return jsonify(response)
 
