@@ -21,7 +21,7 @@ Flask = "==1.0.2"
 Flask-Cors = "==3.0.7"
 Jinja2 = "==2.10"
 MarkupSafe = "==1.1.1"
-Pillow = "==6.0.0"
+Pillow = "==9.3.0"
 Werkzeug = "==0.15.2"
 gunicorn = "==19.9.0"
 
